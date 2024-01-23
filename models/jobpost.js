@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const jobPostSchema = new mongoose.Schema(
   {
+    usernameEmployer: {
+      type: String,
+      required: true,
+    },
     title: {
       type: String,
       required: true,

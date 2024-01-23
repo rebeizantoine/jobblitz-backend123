@@ -1,5 +1,4 @@
 const axios = require("axios");
-const FormData = require("form-data"); // Add this line
 const IMAGEBB_API_KEY = process.env.IMAGEBB_API_KEY;
 
 exports.imageUploader = async (req) => {

@@ -1,17 +1,24 @@
+const multer = require("multer");
+const upload = multer({ storage: multer.memoryStorage() });
 const express = require("express");
 const router = express.Router();
-const employerController = require("../controllers/employerController");
 
-// Get all employers
-router.get("/employers", employerController.getAllEmployers);
+const {
+  getAllEmployers,
+  getEmployerByID,
+  updateEmployerByID,
+  deleteEmployerByID,
+  addEmployer,
+  employerLogin,
+  getEmployerByUsername,
+} = require("../controllers/employerController");
 
-// Get employer by ID
-router.get("/employers/:id", employerController.getEmployerById);
-
-// Create a new employer
-router.post("/employers", employerController.createEmployer);
-
-// Delete an employer
-router.delete("/employers/:id", employerController.deleteEmployer);
+router.post("/employers", addEmployer);
+router.get("/getAll", getAllEmployers);
+router.get("/employers/:employerId", getEmployerByID);
+router.get("/employers/username/:usernameEmployer", getEmployerByUsername);
+router.put("/employers/update/:employerId", updateEmployerByID);
+router.delete("/employers/delete/:employerId", deleteEmployerByID);
+router.post("/login", employerLogin);
 
 module.exports = router;

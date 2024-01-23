@@ -1,13 +1,10 @@
 const mongoose = require("mongoose");
+
 const categorySchema = new mongoose.Schema({
-  categoryname: {
-    type: String,
-    required: true,
-  },
-  categoryimage: {
-    type: String,
-    required: true,
-  },
+  categoryName: { type: String, required: true },
+  image: { type: String }, // URL or path of the image
 });
-const Categories = mongoose.model("Categories", categorySchema);
-module.exports = Categories;
+
+const Category = mongoose.model("Category", categorySchema);
+
+module.exports = Category;

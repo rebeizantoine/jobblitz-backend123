@@ -1,111 +1,110 @@
-const Categories = require("../models/category");
-const { imageUploader } = require("../extra/imageUploader");
+const db = require("../config/db");
+const Category = require("../models/category");
 
 // Get all categories
 const getAllCategories = async (req, res) => {
   try {
-    const categories = await Categories.find();
-    res.status(200).json({
-      success: true,
-      message: "",
-      data: categories,
-    });
+    const categories = await Category.find();
+    res.json(categories);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-      data: null,
-    });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-// Get category by ID
-const getCategoryById = async (req, res) => {
+// Get a Category by ID
+const getCategoryByID = async (req, res) => {
   try {
-    const category = await Categories.findById(req.params.id);
-    if (category) {
-      res.status(200).json({
-        success: true,
-        message: "",
-        data: category,
-      });
-    } else {
-      res.status(404).json({
-        success: false,
-        message: "Category not found",
-        data: null,
-      });
+    const foundCategory = await Category.findById(req.params.id);
+
+    if (!foundCategory) {
+      return res.status(404).json({ msg: "Category not found" });
     }
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-      data: null,
-    });
+    res.json(foundCategory);
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "Category not found" });
+    }
+    res.status(500).send("Server Error");
   }
 };
 
-// Create a new category
-const createCategory = async (req, res) => {
+// Update category
+const updateCategory = async (req, res) => {
+  const categoryId = req.params.id;
+
   try {
-    // Check if req.file is defined
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "Category image is required",
-      });
+    const updatedCategory = await Category.findOneAndUpdate(
+      { _id: categoryId },
+      {
+        $set: {
+          categoryName: req.body.categoryName,
+        },
+      },
+      { new: true }
+    );
+
+    // Check if the category was found and updated
+    if (!updatedCategory) {
+      return res.status(404).json({ msg: "Category not found" });
     }
-
-    const categoryImage = await imageUploader(req);
-    if (!categoryImage) {
-      return res.status(400).json({
-        success: false,
-        message: "Error uploading category image",
-      });
-    }
-
-    const category = new Categories({
-      categoryname: req.body.categoryname,
-      categoryimage: categoryImage, // Use the uploaded image path
-    });
-
-    const newCategory = await category.save();
-    res.status(201).json({
-      success: true,
-      message: "Category created successfully",
-      data: newCategory,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-      data: null,
-    });
+    res.json(updatedCategory);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
   }
 };
 
 // Delete a category
 const deleteCategory = async (req, res) => {
+  const categoryId = req.params.id;
   try {
-    await Categories.findByIdAndDelete(req.params.id);
-    res.status(200).json({
+    const result = await Category.findByIdAndDelete(categoryId);
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+    res.json({
       success: true,
       message: "Category deleted successfully",
-      data: null,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
-      data: null,
+      message: "Unable to delete Category",
+      error: error.message,
     });
   }
 };
 
-// Export the controller functions
+// Add a category without an image
+const addCategory = async (req, res) => {
+  try {
+    const category = await Category.create({
+      categoryName: req.body.categoryName,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Category added successfully",
+      data: category,
+    });
+  } catch (error) {
+    console.error("Error adding category:", error);
+    res.status(400).json({
+      success: false,
+      message: "Category not added successfully",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getAllCategories,
-  getCategoryById,
-  createCategory,
+  getCategoryByID,
+  addCategory,
   deleteCategory,
+  updateCategory,
 };

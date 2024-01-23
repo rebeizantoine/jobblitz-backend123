@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
+const { Schema, model } = mongoose;
 
-const employerSchema = new mongoose.Schema({
+const employersSchema = new mongoose.Schema({
   firstnameEmployer: {
     type: String,
     required: true,
@@ -33,9 +34,7 @@ const employerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  imageEmployer: {
-    type: String,
-  },
+
   genderEmployer: {
     type: String,
     required: true,
@@ -43,26 +42,51 @@ const employerSchema = new mongoose.Schema({
   emailEmployer: {
     type: String,
     required: true,
-    unique: true,
     validate: {
       validator: function (v) {
-        return /^[^s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+        return /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(v);
       },
       message: "Invalid email format",
     },
   },
-  roleEmployer: {
+  role: {
     type: String,
     required: true,
   },
-  postitionEmployer:{
-    type:String,
-    required:true
+  postitionEmployer: {
+    type: String,
   },
-  companyName:{
-    type:String,
-  }
-  
+  companyName: {
+    type: String,
+  },
+  companyType: {
+    type: String,
+  },
+  companyCountry: {
+    type: String,
+  },
+  companyPhone: {
+    type: String,
+  },
+  companyProfile: {
+    type: String,
+  },
+  companyNumberofemployees: {
+    type: String,
+  },
+  companyWebsite: {
+    type: String,
+  },
+  educationEmployer: {
+    type: String,
+  },
+  experienceEmployer: {
+    type: String,
+  },
+  companyrecruitingfor: {
+    type: String,
+  },
 });
-const Employers = mongoose.model("Employers", employerSchema);
-module.exports = Employers;
+const Employer = mongoose.model("Employer", employersSchema);
+
+module.exports = Employer;

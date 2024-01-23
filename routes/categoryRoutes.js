@@ -1,23 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
-const categoryController = require("../controllers/categoryController");
+const upload = multer({ storage: multer.memoryStorage() });
 
-// Get all categories
-router.get("/categories", categoryController.getAllCategories);
+const {
+  getAllCategories,
+  getCategoryByID,
+  addCategory,
+  deleteCategory,
+  updateCategory,
+} = require("../controllers/categoryController");
 
-// Get category by ID
-router.get("/categories/:id", categoryController.getCategoryById);
-
-// Create a new category
-router.post(
-  "/categories",
-  upload.single("categoryimage"),
-  categoryController.createCategory
-);
-
-// Delete a category
-router.delete("/categories/:id", categoryController.deleteCategory);
-
+router.get("/", getAllCategories);
+router.get("/getByID/:id", getCategoryByID);
+router.post("/addCategory", upload.single("image"), addCategory);
+router.put("/updateCategory/:id", updateCategory);
+router.delete("/deleteCategory/:id", deleteCategory);
 module.exports = router;
