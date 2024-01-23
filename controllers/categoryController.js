@@ -1,5 +1,55 @@
-const db = require("../config/db");
+const axios = require("axios");
+const FormData = require("form-data");
 const Category = require("../models/category");
+const multer = require("multer");
+
+const IMAGEBB_API_KEY = process.env.IMAGEBB_API_KEY;
+
+// Image uploader function (similar to what you've provided)
+const imageUploader = async (req) => {
+  const formData = new FormData();
+  formData.append("key", IMAGEBB_API_KEY);
+  const image = req.file.buffer.toString("base64");
+  formData.append("image", image);
+
+  try {
+    const response = await axios.post(
+      "https://api.imgbb.com/1/upload",
+      formData
+    );
+    return response?.data?.data?.url;
+  } catch (error) {
+    console.error("Error from ImgBB API:", error.response?.data);
+    throw new Error("Failed to upload image to ImgBB");
+  }
+};
+
+// Controller to add a category with an image
+const addCategory = async (req, res) => {
+  try {
+    // Upload the image and get the image URL
+    const imageUrl = await imageUploader(req);
+
+    // Create the category with the image URL
+    const category = await Category.create({
+      categoryName: req.body.categoryName,
+      image: imageUrl,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Category added successfully",
+      data: category,
+    });
+  } catch (error) {
+    console.error("Error adding category:", error);
+    res.status(400).json({
+      success: false,
+      message: "Category not added successfully",
+      error: error.message,
+    });
+  }
+};
 
 // Get all categories
 const getAllCategories = async (req, res) => {
@@ -74,28 +124,6 @@ const deleteCategory = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Unable to delete Category",
-      error: error.message,
-    });
-  }
-};
-
-// Add a category without an image
-const addCategory = async (req, res) => {
-  try {
-    const category = await Category.create({
-      categoryName: req.body.categoryName,
-    });
-
-    res.status(200).json({
-      success: true,
-      message: "Category added successfully",
-      data: category,
-    });
-  } catch (error) {
-    console.error("Error adding category:", error);
-    res.status(400).json({
-      success: false,
-      message: "Category not added successfully",
       error: error.message,
     });
   }
