@@ -1,5 +1,7 @@
 const axios = require("axios");
 const FormData = require("form-data");
+const axios = require("axios");
+const FormData = require("form-data");
 const Category = require("../models/category");
 const multer = require("multer");
 

@@ -21,6 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 // Use your routes here
 app.use("/admin", adminRoutes);
 app.use("/employer", employerRoutes);
+app.use("/jobseeker", jobseekerRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/jobdescriptions", jobDescriptionRoutes);
 app.use("/jobseeker", jobseekerRoutes);
