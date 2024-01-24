@@ -1,26 +1,37 @@
+// cvRoutes.js
 const express = require("express");
 const router = express.Router();
-const {
-  createCV,
-  deleteCVById,
-  updateCVById,
-  getCVById,
-  getAllCVs,
-} = require("../controllers/cvController");
+const multer = require("multer");
+const Jobseekers = require("../models/jobseekers");
 
-// Create a new CV
-router.post("/createCV", createCV);
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./uploads"); // Set the destination folder for uploaded files
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${req.params.jobseekId}_${file.originalname}`); // Set the filename
+  },
+});
 
-// Get all CVs
-router.get("/getAllCVs", getAllCVs);
+const upload = multer({ storage: storage });
 
-// Get CV by ID
-router.get("/getCVById/:id", getCVById);
+router.post("/:jobseekId", upload.single("cvFile"), async (req, res) => {
+  try {
+    // Handle the uploaded file here
+    const uploadedCVPath = `/uploads/${req.file.filename}`;
 
-// Update CV by ID
-router.put("/updateCVById/:id", updateCVById);
+    // Update the jobseeker document with the uploaded CV path
+    await Jobseekers.findByIdAndUpdate(
+      req.params.jobseekId,
+      { cvjobseek: uploadedCVPath },
+      { new: true }
+    );
 
-// Delete CV by ID
-router.delete("/deleteCVById/:id", deleteCVById);
+    res.status(200).json({ uploadedCVPath });
+  } catch (error) {
+    console.error("Error uploading CV file:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 module.exports = router;
