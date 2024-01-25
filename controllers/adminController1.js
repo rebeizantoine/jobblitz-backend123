@@ -1,4 +1,6 @@
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const { generateToken } = require("../extra/generateToken");
 const Admins = require("../models/admin");
 
 // Get all admins
@@ -8,6 +10,50 @@ const getAllAdmins = async (req, res) => {
     res.json(admins);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+const adminLogin = async (req, res) => {
+  const { adminname, adminpassword } = req.body;
+
+  try {
+    // Find the admin by adminname
+    const admin = await Admins.findOne({ adminname });
+
+    // Check if the admin exists
+    if (!admin) {
+      return res.status(400).json({
+        success: false,
+        message: `Admin with username ${adminname} not found`,
+      });
+    }
+
+    // Compare the provided password with the stored password
+    const passwordMatch = await bcrypt.compare(
+      adminpassword,
+      admin.adminpassword
+    );
+
+    if (!passwordMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Wrong password.",
+      });
+    }
+
+    // Create a JWT token and send it back to the client
+    const token = generateToken(admin._id, admin.adminrole);
+
+    return res.status(200).json({
+      success: true,
+      message: `Admin with username ${adminname} logged in successfully.`,
+      data: token,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: "Unable to login.",
+      error: error.message,
+    });
   }
 };
 
@@ -58,4 +104,5 @@ module.exports = {
   getAdminById,
   createAdmin,
   deleteAdmin,
+  adminLogin,
 };

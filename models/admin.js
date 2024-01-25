@@ -11,7 +11,6 @@ const adminSchema = new mongoose.Schema({
   },
   adminrole: {
     type: String,
-    required: true,
   },
 });
 const Admins = mongoose.model("Admins", adminSchema);
