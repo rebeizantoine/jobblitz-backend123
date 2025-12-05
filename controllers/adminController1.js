@@ -13,43 +13,58 @@ const getAllAdmins = async (req, res) => {
   }
 };
 const adminLogin = async (req, res) => {
-  const { adminname, adminpassword } = req.body;
-
   try {
-    // Find the admin by adminname
-    const admin = await Admins.findOne({ adminname });
+    // Log incoming request body for debugging
+    console.log("➡️ Login attempt with body:", req.body);
 
-    // Check if the admin exists
-    if (!admin) {
+    const { adminname, adminpassword } = req.body;
+
+    // Check if both fields exist
+    if (!adminname || !adminpassword) {
       return res.status(400).json({
         success: false,
-        message: `Admin with username ${adminname} not found`,
+        message: "Adminname and password are required.",
       });
     }
 
-    // Compare the provided password with the stored password
+    // Find the admin by adminname
+    const admin = await Admins.findOne({ adminname });
+    console.log("🔍 Found admin record:", admin);
+
+    // If admin not found
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: `Admin with username "${adminname}" not found`,
+      });
+    }
+
+    // Compare provided password with hashed password
     const passwordMatch = await bcrypt.compare(
       adminpassword,
       admin.adminpassword
     );
 
     if (!passwordMatch) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "Wrong password.",
       });
     }
 
-    // Create a JWT token and send it back to the client
+    // Generate JWT token
     const token = generateToken(admin._id, admin.adminrole);
+
+    console.log("✅ Login successful, token generated");
 
     return res.status(200).json({
       success: true,
-      message: `Admin with username ${adminname} logged in successfully.`,
+      message: `Admin with username "${adminname}" logged in successfully.`,
       data: token,
     });
   } catch (error) {
-    return res.status(400).json({
+    console.error("❌ Error during admin login:", error);
+    return res.status(500).json({
       success: false,
       message: "Unable to login.",
       error: error.message,

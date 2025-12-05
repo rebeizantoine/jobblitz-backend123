@@ -13,7 +13,7 @@ const {
 router.get("/admins", getAllAdmins);
 
 // Get admin by ID
-router.get("/admins/:id", getAdminById);
+router.get("/admins/:id", getAdminById);  
 
 // Create a new admin
 router.post("/admins", createAdmin);
